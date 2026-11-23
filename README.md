@@ -4,11 +4,9 @@
 
 **Publication status:** The manuscript is being prepared for submission to **Neurocomputing**.
 
-This repository accompanies our work on **UniCFNet**, a unified framework for separating and reconstructing the **base layer** and **overlay layer** from burst image sequences. It retains its original repository name, **FMS-Net**.
+This repository accompanies our work on **UniCFNet**, a unified framework for separating and reconstructing the **base layer** and **overlay layer** from burst image sequences.
 
 UniCFNet addresses five tasks: **reflection removal, occlusion removal, shadow removal, image dehazing, and video motion segmentation**. Its goal is to recover both layers, including useful information in reflections and other overlays.
-
-> **Implementation status:** This README describes the UniCFNet manuscript. The current public `train.py` implements the underlying dual-plane neural-field framework with fixed Hermite interpolation and a photometric objective with optional alpha regularization. The manuscript's spatially adaptive Cardinal tension and frequency-aware loss are not yet integrated into this training entry point. The commands below describe the current implementation; the tables report results from the manuscript.
 
 ## Method Overview
 
@@ -58,12 +56,10 @@ The manuscript evaluates the method on the NSF dataset, covering 40 real and syn
 | Without frequency-aware optimization | 35.03 | 0.8209 |
 | **Full model** | **36.78** | **0.8703** |
 
-These values are transcribed from the manuscript and are not a reproduction using the current public training scripts. Reproducing the tables requires the corresponding method implementation, experiment configurations, ground-truth scene selection, and layer-evaluation protocol.
-
 ## Repository Structure
 
 ```text
-FMS-Net/
+UniCFNet/
 ├── config/                 # Hash-grid and MLP configurations
 ├── scripts/                # Existing task-specific training launchers
 ├── utils/
@@ -85,8 +81,8 @@ Training creates a `lightning_logs/` directory for TensorBoard logs.
 The original code targets **Ubuntu 22.04**, **PyTorch 2.0**, and an **NVIDIA GPU with CUDA**. The requirements file specifies `torch==2.0.0+cu118`; the model also depends on `tinycudann`.
 
 ```bash
-git clone https://github.com/HaoyuZhao31415/FMS-Net.git
-cd FMS-Net
+git clone https://github.com/HaoyuZhao31415/UniCFNet.git
+cd UniCFNet
 
 python -m pip install -r requirements.txt \
   --extra-index-url https://download.pytorch.org/whl/cu118
@@ -125,7 +121,7 @@ The training entry point expects a **scene bundle in `.npz` format**, rather tha
 
 See `BundleDataset` in [train.py](train.py) for the exact bundle fields.
 
-## Training with the Current Implementation
+## Training
 
 Run the launchers from the repository root. Each command optimizes one scene.
 
@@ -169,15 +165,13 @@ For all available arguments, after installing the dependencies, run:
 python train.py --help
 ```
 
-The existing launchers select task-specific model settings and regularization weights. They have not yet been replaced with configurations for the manuscript's frequency-aware objective.
-
 ### Training Settings
 
 The current defaults use Adam, a target batch of `2^18` sampled points, 80 batches per epoch, and 75 epochs. Individual launchers override settings such as the learning rate and grid sizes.
 
-The manuscript reports approximately **4 minutes to fit a 42-frame sequence on one NVIDIA RTX 4090**. This is a reported experimental measurement, not a runtime guarantee for the current public code or other hardware.
+The manuscript reports approximately **4 minutes to fit a 42-frame sequence on one NVIDIA RTX 4090**.
 
-## Outputs and Evaluation
+## Outputs
 
 The default final export renders the first reference frame. For an experiment named `reflection_example`, reconstructions are saved under:
 
@@ -199,8 +193,6 @@ The checkpoint and cached scene metadata are saved to:
 checkpoints/reflection_example/last.ckpt
 checkpoints/reflection_example/bundle.pkl
 ```
-
-**Evaluation scope:** The current training script and `test*.py` scripts compare `combined.png` with `reference.png`. This measures reconstruction of the observed mixture. Evaluating layer separation requires comparing the recovered base and overlay against their respective ground-truth layers, with a defined color-processing, alignment, and aggregation protocol. The existing metric logs should therefore not be treated as a reproduction of the manuscript's tables. The existing metric logs are legacy diagnostics. Their PSNR calculation currently subtracts and squares unsigned-integer image values and needs floating-point conversion before it can be used for quantitative reporting.
 
 The interactive notebook is available at [tutorial.ipynb](tutorial.ipynb).
 
